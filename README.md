@@ -37,6 +37,8 @@ Defaults are a local-only database named games_bot on port 5432 with user games_
 .\gradlew.bat ktlintFormat
 ```
 
-There are no game unit tests yet. The integration tests validate Liquibase migration execution and a Hibernate transaction against real PostgreSQL. They fail when Docker is unavailable; they are not silently skipped. Testcontainers starts an isolated database, so Compose does not need to be running for tests.
+The Dice match core has unit tests for paired results, five/seven-round series, and until-victory matches with tiebreaks. It uses the documented trial rules and is not connected to Telegram or stakes yet. Branch conventions and implementation scope are in [BRANCHING.md](docs/technical/BRANCHING.md).
+
+The integration tests validate Liquibase migration execution and a Hibernate transaction against real PostgreSQL. They fail when Docker is unavailable; they are not silently skipped. Testcontainers starts an isolated database, so Compose does not need to be running for tests.
 
 On Linux/macOS use ./gradlew in place of .\gradlew.bat. Stop the local database with docker compose stop postgres; its named volume preserves data.
