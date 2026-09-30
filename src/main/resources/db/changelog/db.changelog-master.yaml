@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-application-schema
+      author: games-telegram-bot
+      changes:
+        - sql:
+            sql: CREATE SCHEMA IF NOT EXISTS games_bot;
