@@ -5,3 +5,6 @@ databaseChangeLog:
       changes:
         - sql:
             sql: CREATE SCHEMA IF NOT EXISTS games_bot;
+  - include:
+      file: 002-pvp-wallet.sql
+      relativeToChangelogFile: true
