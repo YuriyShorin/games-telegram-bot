@@ -1,7 +1,7 @@
 # Games
 
 ## Status and decisions
-All six games support solo, duels, and tournaments. Stakes and random outcomes suffice; no skill controls. After accepting a challenge or joining a cup, a player's matches run completely without further readiness confirmations or manual turns. Other cup entrants wait.
+All six games support solo, duels, and tournaments. Stakes and random outcomes suffice; no skill controls. **Owner decision:** players send native game emoji themselves. Each requested attempt has a one-minute deadline; missing it causes technical defeat of the entire match. No additional readiness confirmation is required. Other cup entrants wait.
 
 The creator chooses a published series format. **Owner decision:** either the best result over a chosen number of matches in a series, or play until victory. **Trial interpretation:** a round is one paired set of native attempts; it is not a separately staked match.
 
@@ -11,7 +11,7 @@ The creator chooses a published series format. **Owner decision:** either the be
 
 These interpretations are documented assumptions, not a silent replacement with first-to-three/four. **Open question:** by “until victory,” did the owner instead mean a chosen number of round wins? The above first-decisive-pair rule is the smallest literal trial interpretation.
 
-No final draw or attempt limit. Both players always get an attempt before a pair is compared. No additional stake for tied rounds. Target 3-5 minutes applies mainly to series; until-victory and single solo plays can finish much faster. Do not pad play with artificial delays.
+No final draw or attempt limit. Both players get an attempt before a pair is compared, unless a missed one-minute deadline ends the match by technical defeat. No additional stake for tied rounds. Target 3-5 minutes applies mainly to series; until-victory and single solo plays can finish much faster. Do not pad play with artificial delays.
 
 ## Native outcomes and trial scoring
 [Telegram documents the available value ranges](https://core.telegram.org/bots/api#dice) and [slot combination representation](https://core.telegram.org/api/dice). Equal probabilities and sports animation mappings below are assumptions to verify, not promises from that documentation. Solo returns and formulas are in [ECONOMY.md](ECONOMY.md).
@@ -75,11 +75,11 @@ No final draw or attempt limit. Both players always get an attempt before a pair
 - **Rule:** no solo payout in PvP Slots. Only the PvP bank is settled, avoiding extra currency creation.
 
 ## Consent, forfeits, and interruptions
-Accepting a duel or joining a tournament is sufficient consent for complete play. Silence or leaving the chat after that is not a missed turn. Explicit withdrawal after lock is a trial forfeit; there is no repeated readiness prompt or grace period.
+Accepting a duel or joining a tournament supplies consent without another readiness check. Players send each native game emoji themselves. **Owner decision:** missing the one-minute attempt deadline causes technical defeat of the match. Explicit withdrawal after lock remains a trial forfeit. Leaving the chat alone does not settle the match; a missed attempt deadline does.
 
 Technical defeat gives the opponent the duel bank; in a cup it advances the opponent without a separate match payout. Genuine duel interruption splits the bank equally regardless of partial score. Cup-wide and solo interruption rules are in ECONOMY.md.
 
-**Open question:** beyond explicit withdrawal, what events count as a player-caused technical defeat? Never invent an absence test for an already automatic match.
+**Documented timing assumption:** the one-minute deadline starts with the bot's attempt prompt. **Open questions:** confirm this timer origin, sequential versus simultaneous paired prompts, simultaneous timeouts, and solo timeout settlement. Do not silently treat a player timeout as a refundable interruption.
 
 ## Session fit
 | Engagement | Natural format |

@@ -12,17 +12,17 @@ import java.util.UUID
 
 @Entity
 @Table(name = "duel_bank", schema = "games_bot")
-class DuelBank(
+class DuelBankEntity(
     @Id
-    val id: UUID,
+    var id: UUID,
     @Column(name = "chat_id", nullable = false)
-    val chatId: Long,
+    var chatId: Long,
     @Column(name = "first_player_id", nullable = false)
-    val firstPlayerId: Long,
+    var firstPlayerId: Long,
     @Column(name = "second_player_id", nullable = false)
-    val secondPlayerId: Long,
+    var secondPlayerId: Long,
     @Column(nullable = false, columnDefinition = "numeric")
-    val stake: BigDecimal,
+    var stake: BigDecimal,
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     var status: BankStatus = BankStatus.LOCKED,

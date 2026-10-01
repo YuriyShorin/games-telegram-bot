@@ -10,7 +10,9 @@ import ru.gamestelegrambot.model.SeriesFormat
 @Service
 class DiceMatchService {
     fun compareRound(round: DiceRound): MatchSide? {
-        require(round.first in 1..6 && round.second in 1..6) { "Dice values must be between 1 and 6" }
+        require(round.first in DICE_VALUES && round.second in DICE_VALUES) {
+            "Dice values must be between ${DICE_VALUES.first} and ${DICE_VALUES.last}"
+        }
         return when {
             round.first > round.second -> MatchSide.FIRST
             round.second > round.first -> MatchSide.SECOND
@@ -46,5 +48,9 @@ class DiceMatchService {
             winner = winner,
             isTiebreak = isTiebreak,
         )
+    }
+
+    companion object {
+        private val DICE_VALUES = 1..6
     }
 }

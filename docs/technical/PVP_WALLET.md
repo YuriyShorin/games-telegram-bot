@@ -12,6 +12,8 @@ Registration is explicit before acceptance. The service is an internal applicati
 
 ## Package structure and persistence
 
+Persistence classes follow table names with an `Entity` suffix: `PvpWalletEntity`, `DuelBankEntity`, and `PvpLedgerEntity`. Returned wallet and bank models share their base names: `PvpWallet` and `DuelBank`. Separate extension mappers in the shared `mapper` package convert entities with `toModel()`; services own business rules rather than mapping definitions. `WalletId` remains an embeddable identifier, not a JPA entity. Database table names and migrations are unchanged by this naming refactor.
+
 Application classes live in shared `service`, `repository`, `entity`, `config`, and `model` packages directly under `ru.gamestelegrambot`, without feature-based roots. `PvpWalletService` owns business rules and transaction boundaries. Spring Data JPA repositories own persistence queries and pessimistic locks. Hibernate tracks wallet/bank updates and inserts ledger entities; the ledger repository exposes append operations only. Return models and pure Dice match state live in `model`, separate from persistence entities. Tests mirror the corresponding application packages.
 
 Dice models (`DiceMatch`, `DiceRound`, `SeriesFormat`, and `MatchSide`) each have their own file. `DiceMatchService` validates and compares paired results, updates scores, and resolves series/tiebreaks. It holds no match state; `recordRound` returns a new immutable `DiceMatch`, leaving the previous state intact.

@@ -11,20 +11,20 @@ import java.util.UUID
 
 @Entity
 @Table(name = "pvp_ledger", schema = "games_bot")
-class PvpLedgerEntry(
+class PvpLedgerEntity(
     @Column(name = "chat_id", nullable = false, updatable = false)
-    val chatId: Long,
+    var chatId: Long,
     @Column(name = "player_id", nullable = false, updatable = false)
-    val playerId: Long,
+    var playerId: Long,
     @Column(nullable = false, length = 32, updatable = false)
-    val reason: String,
+    var reason: String,
     @Column(name = "available_delta", nullable = false, columnDefinition = "numeric", updatable = false)
-    val availableDelta: BigDecimal,
+    var availableDelta: BigDecimal,
     @Column(name = "committed_delta", nullable = false, columnDefinition = "numeric", updatable = false)
-    val committedDelta: BigDecimal,
+    var committedDelta: BigDecimal,
     @Column(name = "duel_id", updatable = false)
-    val duelId: UUID? = null,
+    var duelId: UUID? = null,
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    var id: Long? = null,
 )

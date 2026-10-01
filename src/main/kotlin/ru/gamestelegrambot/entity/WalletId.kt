@@ -7,7 +7,7 @@ import java.io.Serializable
 @Embeddable
 data class WalletId(
     @Column(name = "chat_id")
-    val chatId: Long = 0,
+    var chatId: Long = 0,
     @Column(name = "player_id")
-    val playerId: Long = 0,
+    var playerId: Long = 0,
 ) : Serializable
