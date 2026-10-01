@@ -7,14 +7,14 @@ The owner's discovery answers supersede the initial recommendation to launch two
 ### Confirmed scope
 - Dice, Darts, Basketball, Football, Bowling, and Slots, each supporting all three modes.
 - Equally important duels, tournaments, and solo play.
-- Complete PvP series, no manual turn-taking; sequential tournament matches.
+- Manual native game emoji attempts with a one-minute deadline; missing it causes match defeat. Tournament matches remain sequential.
 - Target 3-5 minutes per match.
 - Selectable fixed five/seven-round series or until-victory format; extra paired rounds resolve a tied series without an attempt limit.
 - Stakes and random outcomes; no mandatory skill or strategy controls.
 - Separate PvP and solo balances and rankings; wealth is the primary success measure.
 - Daily grants, no free games, no transfers, no stake caps.
 - Four/eight-player single elimination, a third-place match, prizes for prize places.
-- Acceptance/joining supplies all consent; no repeated readiness checks. Technical losses do not delay the event.
+- Acceptance/joining supplies all consent; no repeated readiness checks. A missed one-minute attempt deadline causes technical defeat and advances the event.
 - Spectator visibility, reactions, and playful taunts; no spectator bets.
 
 **Owner delegation:** calculate the economy. ECONOMY.md now supplies starting grants, daily recovery, stakes, prize shares, solo payout tables, and expected-return calculations. Sports outcome mappings and uniform probabilities are explicit assumptions to verify before paying out real game results.

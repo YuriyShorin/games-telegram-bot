@@ -2,7 +2,7 @@ package ru.gamestelegrambot.model
 
 import java.math.BigDecimal
 
-data class WalletBalance(
+data class PvpWallet(
     val chatId: Long,
     val playerId: Long,
     val available: BigDecimal,

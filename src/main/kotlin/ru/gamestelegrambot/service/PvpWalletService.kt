@@ -2,13 +2,14 @@ package ru.gamestelegrambot.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import ru.gamestelegrambot.entity.DuelBank
-import ru.gamestelegrambot.entity.PvpLedgerEntry
-import ru.gamestelegrambot.entity.PvpWallet
+import ru.gamestelegrambot.entity.DuelBankEntity
+import ru.gamestelegrambot.entity.PvpLedgerEntity
+import ru.gamestelegrambot.entity.PvpWalletEntity
 import ru.gamestelegrambot.entity.WalletId
+import ru.gamestelegrambot.mapper.toModel
 import ru.gamestelegrambot.model.BankStatus
-import ru.gamestelegrambot.model.DuelFunds
-import ru.gamestelegrambot.model.WalletBalance
+import ru.gamestelegrambot.model.DuelBank
+import ru.gamestelegrambot.model.PvpWallet
 import ru.gamestelegrambot.repository.DuelBankRepository
 import ru.gamestelegrambot.repository.PvpLedgerRepository
 import ru.gamestelegrambot.repository.PvpWalletRepository
@@ -30,24 +31,24 @@ class PvpWalletService(
     fun register(
         chatId: Long,
         playerId: Long,
-    ): WalletBalance {
+    ): PvpWallet {
         require(playerId > 0) { "Player ID must be positive" }
-        val inserted = walletRepository.insertIfAbsent(chatId, playerId)
+        val inserted = walletRepository.insertIfAbsent(chatId, playerId, STARTING_GRANT, ZERO)
         val wallet = lockWallet(chatId, playerId)
         if (inserted == 1) {
-            record(wallet, "STARTING_GRANT", BigDecimal("1000.00"), ZERO)
+            record(wallet, "STARTING_GRANT", STARTING_GRANT, ZERO)
         }
-        return wallet.snapshot()
+        return wallet.toModel()
     }
 
     @Transactional(readOnly = true)
     fun balance(
         chatId: Long,
         playerId: Long,
-    ): WalletBalance =
+    ): PvpWallet =
         checkNotNull(walletRepository.findById(WalletId(chatId, playerId)).orElse(null)) {
             "Player is not registered in this group"
-        }.snapshot()
+        }.toModel()
 
     fun acceptDuel(
         duelId: UUID,
@@ -55,12 +56,12 @@ class PvpWalletService(
         firstPlayerId: Long,
         secondPlayerId: Long,
         stake: BigDecimal,
-    ): DuelFunds {
+    ): DuelBank {
         require(firstPlayerId > 0 && secondPlayerId > 0 && firstPlayerId != secondPlayerId) {
             "A duel requires two distinct players"
         }
-        val amount = stake.setScale(2, RoundingMode.UNNECESSARY)
-        require(amount >= MIN_STAKE) { "Minimum stake is 10.00" }
+        val amount = stake.setScale(CURRENCY_SCALE, RoundingMode.UNNECESSARY)
+        require(amount >= MIN_STAKE) { "Minimum stake is $MIN_STAKE" }
         val inserted = bankRepository.insertIfAbsent(duelId, chatId, firstPlayerId, secondPlayerId, amount)
         val bank = lockBank(duelId)
         require(
@@ -76,18 +77,18 @@ class PvpWalletService(
                 record(wallet, "DUEL_COMMITMENT", -amount, amount, bank.id)
             }
         }
-        return bank.snapshot()
+        return bank.toModel()
     }
 
     fun awardWinner(
         duelId: UUID,
         winnerId: Long,
-    ): DuelFunds = settle(lockBank(duelId), BankStatus.WON, winnerId)
+    ): DuelBank = settle(lockBank(duelId), BankStatus.WON, winnerId)
 
     fun forfeit(
         duelId: UUID,
         withdrawingPlayerId: Long,
-    ): DuelFunds {
+    ): DuelBank {
         val bank = lockBank(duelId)
         require(withdrawingPlayerId == bank.firstPlayerId || withdrawingPlayerId == bank.secondPlayerId) {
             "Withdrawing player must be a participant"
@@ -96,42 +97,42 @@ class PvpWalletService(
         return settle(bank, BankStatus.FORFEITED, winnerId)
     }
 
-    fun interrupt(duelId: UUID): DuelFunds = settle(lockBank(duelId), BankStatus.INTERRUPTED, null)
+    fun interrupt(duelId: UUID): DuelBank = settle(lockBank(duelId), BankStatus.INTERRUPTED, null)
 
     fun claimRecovery(
         chatId: Long,
         playerId: Long,
-    ): WalletBalance {
+    ): PvpWallet {
         val wallet = lockWallet(chatId, playerId)
         val today = LocalDate.now(clock.withZone(MOSCOW))
-        if (wallet.lastRecoveryDate?.let { it >= today } == true) return wallet.snapshot()
+        if (wallet.lastRecoveryDate?.let { it >= today } == true) return wallet.toModel()
         val wealth = wallet.available + wallet.committed
-        if (wealth >= RECOVERY_THRESHOLD) return wallet.snapshot()
+        if (wealth >= RECOVERY_THRESHOLD) return wallet.toModel()
         val grant = (RECOVERY_THRESHOLD - wealth).min(RECOVERY_MAX)
         wallet.available += grant
         wallet.lastRecoveryDate = today
         record(wallet, "DAILY_RECOVERY", grant, ZERO)
-        return wallet.snapshot()
+        return wallet.toModel()
     }
 
     private fun settle(
-        bank: DuelBank,
+        bank: DuelBankEntity,
         status: BankStatus,
         winnerId: Long?,
-    ): DuelFunds {
+    ): DuelBank {
         require(winnerId == null || winnerId == bank.firstPlayerId || winnerId == bank.secondPlayerId) {
             "Winner must be a participant"
         }
         if (bank.status != BankStatus.LOCKED) {
             check(bank.status == status && bank.winnerId == winnerId) { "Duel has a conflicting settlement" }
-            return bank.snapshot()
+            return bank.toModel()
         }
         lockParticipants(bank).forEach { wallet ->
             check(wallet.committed >= bank.stake) { "Committed balance is inconsistent" }
             val payout =
                 when {
                     status == BankStatus.INTERRUPTED -> bank.stake
-                    wallet.id.playerId == winnerId -> bank.stake * BigDecimal("2")
+                    wallet.id.playerId == winnerId -> bank.stake * DUEL_BANK_MULTIPLIER
                     else -> ZERO
                 }
             wallet.committed -= bank.stake
@@ -140,44 +141,44 @@ class PvpWalletService(
         }
         bank.status = status
         bank.winnerId = winnerId
-        return bank.snapshot()
+        return bank.toModel()
     }
 
-    private fun lockParticipants(bank: DuelBank): List<PvpWallet> =
+    private fun lockParticipants(bank: DuelBankEntity): List<PvpWalletEntity> =
         listOf(bank.firstPlayerId, bank.secondPlayerId).sorted().map { lockWallet(bank.chatId, it) }
 
     private fun lockWallet(
         chatId: Long,
         playerId: Long,
-    ): PvpWallet =
+    ): PvpWalletEntity =
         checkNotNull(
             walletRepository.findLockedById(WalletId(chatId, playerId)),
         ) { "Player is not registered in this group" }
 
-    private fun lockBank(duelId: UUID): DuelBank =
+    private fun lockBank(duelId: UUID): DuelBankEntity =
         checkNotNull(bankRepository.findLockedById(duelId)) {
             "Duel commitment does not exist"
         }
 
     private fun record(
-        wallet: PvpWallet,
+        wallet: PvpWalletEntity,
         reason: String,
         availableDelta: BigDecimal,
         committedDelta: BigDecimal,
         duelId: UUID? = null,
     ) {
         ledgerRepository.save(
-            PvpLedgerEntry(wallet.id.chatId, wallet.id.playerId, reason, availableDelta, committedDelta, duelId),
+            PvpLedgerEntity(wallet.id.chatId, wallet.id.playerId, reason, availableDelta, committedDelta, duelId),
         )
     }
 
-    private fun PvpWallet.snapshot() = WalletBalance(id.chatId, id.playerId, available, committed)
-
-    private fun DuelBank.snapshot() = DuelFunds(id, chatId, firstPlayerId, secondPlayerId, stake, status, winnerId)
-
     companion object {
+        const val CURRENCY_SCALE = 2
+        val MIN_STAKE = BigDecimal("10.00")
+
         private val ZERO = BigDecimal("0.00")
-        private val MIN_STAKE = BigDecimal("10.00")
+        private val STARTING_GRANT = BigDecimal("1000.00")
+        private val DUEL_BANK_MULTIPLIER = BigDecimal("2")
         private val RECOVERY_THRESHOLD = BigDecimal("300.00")
         private val RECOVERY_MAX = BigDecimal("100.00")
         private val MOSCOW = ZoneId.of("Europe/Moscow")

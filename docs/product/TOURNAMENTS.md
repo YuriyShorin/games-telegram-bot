@@ -6,7 +6,7 @@
 - Losing semifinalists play a third-place match.
 - Prize-winning places receive rewards; exact places and allocation require confirmation.
 - Complete matches run sequentially; other entrants wait.
-- Joining is sufficient consent; there is no extra readiness check before matches. A technical defeat advances the opponent without waiting; silence during automatic play is not absence.
+- Joining is sufficient consent; there is no extra readiness check before matches. Players send native game emoji themselves within one minute per requested attempt; a missed deadline causes technical defeat and advances the opponent.
 - PvP funds pay entry fees and receive prizes.
 - No spectator betting in the first release.
 
@@ -22,7 +22,7 @@ At the target 3-5 minutes per match, expect roughly 12-20 minutes for four entra
 1. Read the game, series rules, entry fee, prize allocation, start condition, and absence policy.
 2. Join and commit entry.
 3. At lock/start, see the bracket and match order.
-4. Watch each complete match and advance after a win.
+4. Send each requested native game emoji within one minute during your match; a missed deadline loses the match. Advance after a win.
 5. Losing semifinalists contest bronze; finalists contest the championship.
 6. Receive prizes and update PvP wealth and tournament history.
 
@@ -48,7 +48,7 @@ The creator chooses a fixed five/seven-round series or until-victory format acco
 **Recommendation:** bronze and final use the same published series format as earlier rounds.
 
 ## Technical defeats and interruptions
-**Decision:** joining is enough consent; do not wait for later readiness responses. **Trial rule:** explicit withdrawal after lock is a forfeit. Leaving or not reacting during an automatic series does not establish absence.
+**Decision:** joining is enough consent; do not wait for later readiness responses. **Trial rule:** explicit withdrawal after lock is a forfeit. **Owner decision:** missing the one-minute deadline to send the required native game emoji causes technical defeat and advances the opponent. Leaving the chat alone is not a separate defeat trigger.
 
 **Open questions:** other causes of technical loss, double forfeits, bronze eligibility after withdrawal, and whether an unplayed final awards a title.
 
@@ -57,7 +57,7 @@ These details must be published before entries; no extra grace period is assumed
 **Owner decision:** interruption splits the bank. **Trial interpretation for a cup:** void placements and split the whole unsettled entry pool equally among all original entrants, including eliminated players. Equal fees mean entry is returned to each. No champion or prizes on top. This interpretation needs confirmation if “split” meant a different tournament allocation. A single player's withdrawal is a forfeit, not cup-wide interruption.
 
 ## Future ideas
-Recurring cups, themed cups, sixteen players, teams, mixed-game cups, and a Grand Final. Round robin is an optional different format, not the chosen initial direction. Asynchronous cups require their own absence/deadline policy and are outside the current no-wait model.
+Recurring cups, themed cups, sixteen players, teams, mixed-game cups, and a Grand Final. Round robin is an optional different format, not the chosen initial direction. Asynchronous cups require a separate deadline policy and are outside the current one-minute attempt model.
 
 ## Test questions
 Do waiting entrants stay interested? Is bronze worth playing? Do eight-player cups run too long? Do entry fees exclude friends? Are ties and technical defeats understood without disputes?

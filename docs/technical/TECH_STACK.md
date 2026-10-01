@@ -42,7 +42,7 @@ The following tools are configured in the Kotlin scaffold. They do not introduce
 
 **Selection under owner delegation:** official Telegram Bot API through the maintained Java SDK `rubenlagus/TelegramBots`, version **10.3.0**. Use the plain `telegrambots-longpolling` and `telegrambots-client` modules, aligned at the same SDK version (its BOM can keep modules together).
 
-**Recommended initial update delivery:** long polling. It fits a single private-group bot without requiring a public inbound endpoint. Native outcomes must come from Telegram's sendDice results; local pseudo-random numbers are only suitable as test fixtures, not substitutes for native animations.
+**Recommended initial update delivery:** long polling. It fits a single private-group bot without requiring a public inbound endpoint. **Updated owner decision:** players send native game emoji themselves. Native outcomes must come from incoming player game messages, rather than bot sendDice attempts. The Telegram flow enforces the one-minute attempt deadline and handles a missed deadline as technical defeat. Timing assumptions and remaining questions are in GAMES.md. Local pseudo-random numbers are only suitable as test fixtures, not substitutes for native animations.
 
 | Option examined | Assessment |
 | --- | --- |

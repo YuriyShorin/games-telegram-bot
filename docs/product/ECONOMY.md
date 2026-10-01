@@ -83,11 +83,11 @@ Solo loses about 10% of turnover on average (9.375% for Slots), offsetting some 
 Weekly observe grants versus solo net payouts, total supply per track, median wealth, concentration, and players unable to afford ordinary events. Adjust future grants/payouts openly, only for new commitments. Optional cosmetic sinks or cup charges are future ideas, not launch rules.
 
 ## Forfeits and interruptions
-**Decision:** duel forfeit awards the entire bank to the opponent. Genuine interruption divides it equally; with equal stakes each gets their stake back. Partial score does not change this split. A player abandoning a losing duel is a forfeit, not a refundable interruption.
+**Decision:** duel forfeit awards the entire bank to the opponent. Missing the one-minute native game emoji deadline is a technical defeat and awards the opponent the entire duel bank. Genuine interruption divides it equally; with equal stakes each gets their stake back. Partial score does not change this split. A player abandoning a losing duel is a forfeit, not a refundable interruption.
 
 **Trial interpretation for cups:** no individual match bank exists. A technical loss advances the opponent; the entry pool remains for the final prize places. If the entire cup is interrupted and cannot complete, void its placements and split the full unsettled pool equally among original entrants, including eliminated players. Equal fees mean everyone gets their entry back; no prizes or champion are awarded. This interpretation of “split the bank” needs confirmation if the owner meant a different tournament treatment.
 
-Solo interruption before a trustworthy result returns the stake; a known result settles normally. A settled play cannot be cancelled to reverse a loss. Distinguish player-caused forfeits from event-wide interruption before funds are committed.
+Solo timeout settlement remains open; a player missing the emoji deadline must not silently receive an interruption refund. Genuine solo interruption before a trustworthy result returns the stake; a known result settles normally. A settled play cannot be cancelled to reverse a loss. Distinguish player-caused forfeits from event-wide interruption before funds are committed.
 
 ## Abuse and remaining uncertainty
 No gifts does not stop intentional forfeits transferring PvP wealth. Extra identities can farm grants. Never infer cheating from lucky outcomes. Agree on a group fairness policy if abuse appears.

@@ -23,7 +23,7 @@ Turn a familiar group chat into a place where friends build virtual wealth throu
 
 ## Target players and experience
 
-**Decision:** duels and four-player events are expected to be most popular; four- and eight-player tournaments are supported. Accepted matches run as complete series without manual turn-by-turn participation. Tournament matches are sequential while other entrants wait. Target match length is 3-5 minutes. Playful taunts are part of the desired tone.
+**Decision:** duels and four-player events are expected to be most popular; four- and eight-player tournaments are supported. Players send native game emoji themselves; missing the one-minute attempt deadline causes technical defeat of the match. Tournament matches are sequential while other entrants wait. Target match length is 3-5 minutes. Playful taunts are part of the desired tone.
 
 **Assumption:** friends enjoy watching a complete random series unfold. Acceptable chat traffic remains unknown.
 
@@ -69,7 +69,7 @@ Grow a balance, climb a wealth table, beat a friend next time, attend the next c
 
 - **Strong:** small cups, close scores, agreed stakes, rematches, wealth competition, and playful taunts fit an existing social group.
 - **Potentially repetitive:** highest-roll spam, long sequences with no choices, and cosmetic changes to otherwise identical games.
-- **Waiting risks:** sequential matches and unlimited tied attempts. Automatic series remove manual turn delays; no repeated readiness checkpoint is required.
+- **Waiting risks:** sequential matches and unlimited tied attempts. Each manual emoji attempt has a one-minute deadline; a missed deadline causes technical defeat. No repeated readiness checkpoint is required.
 - **Chat risks:** unsolicited challenges, repeated reminders, every statistic becoming a separate announcement, and overlapping matches obscuring results.
 - **Retention risks:** early bankruptcy, dominant wallets, inconvenient cup times, and treating random outcomes as a serious skill ranking.
 

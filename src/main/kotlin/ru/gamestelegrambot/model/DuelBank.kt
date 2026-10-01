@@ -3,7 +3,7 @@ package ru.gamestelegrambot.model
 import java.math.BigDecimal
 import java.util.UUID
 
-data class DuelFunds(
+data class DuelBank(
     val id: UUID,
     val chatId: Long,
     val firstPlayerId: Long,

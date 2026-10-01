@@ -9,13 +9,17 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "pvp_wallet", schema = "games_bot")
-class PvpWallet(
+class PvpWalletEntity(
     @EmbeddedId
-    val id: WalletId,
+    var id: WalletId,
     @Column(nullable = false, columnDefinition = "numeric")
-    var available: BigDecimal = BigDecimal("1000.00"),
+    var available: BigDecimal,
     @Column(nullable = false, columnDefinition = "numeric")
-    var committed: BigDecimal = BigDecimal("0.00"),
+    var committed: BigDecimal = ZERO,
     @Column(name = "last_recovery_date")
     var lastRecoveryDate: LocalDate? = null,
-)
+) {
+    companion object {
+        private val ZERO = BigDecimal("0.00")
+    }
+}
