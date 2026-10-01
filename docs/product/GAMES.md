@@ -79,7 +79,9 @@ Accepting a duel or joining a tournament supplies consent without another readin
 
 Technical defeat gives the opponent the duel bank; in a cup it advances the opponent without a separate match payout. Genuine duel interruption splits the bank equally regardless of partial score. Cup-wide and solo interruption rules are in ECONOMY.md.
 
-**Documented timing assumption:** the one-minute deadline starts with the bot's attempt prompt. **Open questions:** confirm this timer origin, sequential versus simultaneous paired prompts, simultaneous timeouts, and solo timeout settlement. Do not silently treat a player timeout as a refundable interruption.
+**Owner decisions (2026-10-01):** Dice duel attempts are sequential. The first player in each paired round is selected randomly; that choice is saved and not redrawn on retries. The second player is prompted only after the first player's valid attempt. Each player's minute starts after successful sending of their bot prompt. A native message sent no later than the deadline is accepted even when processed later; equality at the deadline is allowed. Message timestamps supplied by the Telegram adapter are authoritative, rather than processing time.
+
+**Open questions:** timeout delivery coordination and solo timeout settlement. Do not silently treat a player timeout as a refundable interruption.
 
 ## Session fit
 | Engagement | Natural format |
