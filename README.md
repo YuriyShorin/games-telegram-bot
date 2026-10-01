@@ -49,6 +49,6 @@ The internal `PvpWalletService` registers a group-local PvP balance, commits equ
 
 The internal `DuelInvitationService` persists Dice challenges and accepts them only from the invited opponent in the originating chat. Acceptance commits both stakes in the same transaction; failed or repeated acceptance cannot debit funds twice. Scope and lifecycle limits are documented in [DUEL_INVITATIONS.md](docs/technical/DUEL_INVITATIONS.md).
 
-Acceptance also persists the initial Dice duel in that transaction. `DiceDuelService` reads its immutable state in the originating chat; attempts, timers, and match-driven settlement are subsequent tasks. Persistence and legacy-data handling are documented in [DICE_DUELS.md](docs/technical/DICE_DUELS.md).
+Acceptance also persists the initial Dice duel in that transaction. `DiceDuelService` reads its immutable state in the originating chat. `DiceAttemptService` prepares sequential requests with a saved random first player, starts a one-minute deadline after confirmed prompt delivery, and records native results idempotently. Complete pairs update the match through the game core. Bank settlement, timeout execution, and Telegram delivery remain subsequent tasks. Persistence and legacy-data handling are documented in [DICE_DUELS.md](docs/technical/DICE_DUELS.md).
 
 On Linux/macOS use ./gradlew in place of .\gradlew.bat. Stop the local database with docker compose stop postgres; its named volume preserves data.

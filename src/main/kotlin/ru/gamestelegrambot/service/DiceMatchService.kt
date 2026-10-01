@@ -51,6 +51,6 @@ class DiceMatchService {
     }
 
     companion object {
-        private val DICE_VALUES = 1..6
+        val DICE_VALUES = 1..6
     }
 }
