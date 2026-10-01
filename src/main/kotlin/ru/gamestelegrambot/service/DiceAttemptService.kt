@@ -23,6 +23,7 @@ class DiceAttemptService(
     private val duels: DiceDuelRepository,
     private val requests: DiceAttemptRequestRepository,
     private val rules: DiceMatchService,
+    private val wallets: PvpWalletService,
 ) {
     fun prepareRequest(
         duelId: UUID,
@@ -116,6 +117,11 @@ class DiceAttemptService(
             duel.secondScore = match.secondScore
             duel.winner = match.winner
             duel.isTiebreak = match.isTiebreak
+            match.winner?.let { winner ->
+                val winnerId =
+                    if (winner == MatchSide.FIRST) duel.invitation.challengerId else duel.invitation.opponentId
+                wallets.awardWinner(duelId, winnerId)
+            }
         }
         return duel.toModel()
     }
