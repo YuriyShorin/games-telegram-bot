@@ -2,11 +2,14 @@ package ru.gamestelegrambot.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import ru.gamestelegrambot.entity.DiceDuelEntity
 import ru.gamestelegrambot.entity.DuelInvitationEntity
 import ru.gamestelegrambot.mapper.toModel
+import ru.gamestelegrambot.model.BankStatus
 import ru.gamestelegrambot.model.DuelInvitation
 import ru.gamestelegrambot.model.InvitationStatus
 import ru.gamestelegrambot.model.SeriesFormat
+import ru.gamestelegrambot.repository.DiceDuelRepository
 import ru.gamestelegrambot.repository.DuelInvitationRepository
 import ru.gamestelegrambot.service.PvpWalletService.Companion.CURRENCY_SCALE
 import ru.gamestelegrambot.service.PvpWalletService.Companion.MIN_STAKE
@@ -21,6 +24,7 @@ class
 DuelInvitationService(
     private val repository: DuelInvitationRepository,
     private val walletService: PvpWalletService,
+    private val duelRepository: DiceDuelRepository,
 ) {
     fun challenge(
         invitationId: UUID,
@@ -54,14 +58,17 @@ DuelInvitationService(
         require(invitation.chatId == chatId) { "Invitation belongs to another chat" }
         require(invitation.opponentId == actorId) { "Only the invited opponent may accept" }
         if (invitation.status == InvitationStatus.PENDING) {
-            walletService.acceptDuel(
-                invitation.id,
-                invitation.chatId,
-                invitation.challengerId,
-                invitation.opponentId,
-                invitation.stake,
-            )
+            val bank =
+                walletService.acceptDuel(
+                    invitation.id,
+                    invitation.chatId,
+                    invitation.challengerId,
+                    invitation.opponentId,
+                    invitation.stake,
+                )
+            check(bank.status == BankStatus.LOCKED) { "Cannot start a Dice duel with a settled bank" }
             invitation.status = InvitationStatus.ACCEPTED
+            duelRepository.saveAndFlush(DiceDuelEntity(id = invitation.id, invitation = invitation))
         }
         return invitation.toModel()
     }
