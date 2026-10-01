@@ -158,7 +158,7 @@ class DiceAttemptIntegrationTest {
     }
 
     @Test
-    fun `all formats persist tied rounds tiebreaks and decisive results without paying bank`() {
+    fun `all formats persist tied rounds tiebreaks and settle decisive results`() {
         for (format in SeriesFormat.entries) {
             val id = duel(format)
             var messageId = 1L
@@ -185,13 +185,14 @@ class DiceAttemptIntegrationTest {
                 attempts.prepareRequest(id, chatId, tiedRounds + 2L)
             }
             assertEquals(
-                "LOCKED",
+                "WON",
                 jdbc.queryForObject(
                     "SELECT status FROM games_bot.duel_bank WHERE id = ?",
                     String::class.java,
                     id,
                 ),
             )
+            assertSettlement(id, 1)
             // Different formats share a chat, so subsequent native message IDs must be distinct.
             chatId--
             (1L..3L).forEach { wallets.register(chatId, it) }
@@ -211,7 +212,93 @@ class DiceAttemptIntegrationTest {
             assertEquals(index + 1L, match.secondScore)
             assertEquals(if (index == 4) MatchSide.SECOND else null, match.winner)
         }
+        assertSettlement(id, 2)
     }
+
+    @Test
+    fun `concurrent decisive retries pay the bank once and reject conflicting attempts`() {
+        val id = duel(SeriesFormat.UNTIL_VICTORY)
+        val first = prompted(id, 1)
+        record(first, 1, 6)
+        val second = prompted(id, 1)
+        val results = concurrently { record(second, 2, 1) }
+        assertEquals(results[0], results[1])
+        assertEquals(results.first(), record(second, 2, 1))
+        assertEquals(results.first(), record(first, 1, 6))
+        assertThrows(IllegalArgumentException::class.java) { record(second, 3, 1) }
+        assertThrows(IllegalStateException::class.java) { attempts.prepareRequest(id, chatId, 2) }
+        assertSettlement(id, player(first))
+    }
+
+    @Test
+    fun `settlement failure rolls back decisive attempt match bank wallets and ledger`() {
+        val id = duel(SeriesFormat.UNTIL_VICTORY)
+        val first = prompted(id, 1)
+        record(first, 1, 6)
+        val second = prompted(id, 1)
+        jdbc.execute(
+            "ALTER TABLE games_bot.pvp_ledger ADD CONSTRAINT reject_settlement_test " +
+                "CHECK (duel_id <> '$id' OR reason <> 'WON' OR player_id <> 2)",
+        )
+        try {
+            assertThrows(Exception::class.java) { record(second, 2, 1) }
+            assertNull(attempts.findRequest(id, chatId, second.id).value)
+            assertNull(duels.find(id, chatId).match.winner)
+            assertEquals(0L, duels.find(id, chatId).match.roundsPlayed)
+            assertEquals("LOCKED", bankStatus(id))
+            for (playerId in 1L..2L) {
+                val wallet = wallets.balance(chatId, playerId)
+                assertEquals(BigDecimal("990.00"), wallet.available)
+                assertEquals(BigDecimal("10.00"), wallet.committed)
+            }
+            assertEquals(0, settlementCount(id))
+        } finally {
+            jdbc.execute("ALTER TABLE games_bot.pvp_ledger DROP CONSTRAINT reject_settlement_test")
+        }
+        record(second, 2, 1)
+        assertSettlement(id, player(first))
+    }
+
+    @Test
+    fun `conflicting prior bank settlement cannot commit a decisive result`() {
+        val id = duel(SeriesFormat.UNTIL_VICTORY)
+        val first = prompted(id, 1)
+        record(first, 1, 6)
+        val second = prompted(id, 1)
+        wallets.interrupt(id)
+        assertThrows(IllegalStateException::class.java) { record(second, 2, 1) }
+        assertNull(attempts.findRequest(id, chatId, second.id).value)
+        assertNull(duels.find(id, chatId).match.winner)
+        assertEquals("INTERRUPTED", bankStatus(id))
+        assertEquals(0, settlementCount(id))
+    }
+
+    private fun assertSettlement(
+        id: UUID,
+        winnerId: Long,
+    ) {
+        assertEquals("WON", bankStatus(id))
+        assertEquals(
+            winnerId,
+            jdbc.queryForObject("SELECT winner_id FROM games_bot.duel_bank WHERE id = ?", Long::class.java, id),
+        )
+        for (playerId in 1L..2L) {
+            val wallet = wallets.balance(chatId, playerId)
+            assertEquals(BigDecimal(if (playerId == winnerId) "1010.00" else "990.00"), wallet.available)
+            assertEquals(BigDecimal("0.00"), wallet.committed)
+        }
+        assertEquals(2, settlementCount(id))
+    }
+
+    private fun bankStatus(id: UUID): String? =
+        jdbc.queryForObject("SELECT status FROM games_bot.duel_bank WHERE id = ?", String::class.java, id)
+
+    private fun settlementCount(id: UUID): Int? =
+        jdbc.queryForObject(
+            "SELECT count(*) FROM games_bot.pvp_ledger WHERE duel_id = ? AND reason = 'WON'",
+            Int::class.java,
+            id,
+        )
 
     @Test
     fun `database failure rolls back both attempt and score`() {

@@ -2,7 +2,7 @@
 
 Branch: `feat/persistent-dice-duel`, based on `master`. The documentation plan was retained on this branch at the owner's request.
 
-D1 implements initial persistent match state and reading it and is merged into `master`. D2 on `feat/dice-duel-attempts` adds persistent sequential attempt requests and results. Bank settlement, timeout execution, and Telegram integration remain subsequent tasks.
+D1 implements initial persistent match state and reading it and is merged into `master`. D2 on `feat/dice-duel-attempts` adds persistent sequential attempt requests and results. D3 adds atomic normal-result bank settlement. Timeout execution and Telegram integration remain subsequent tasks.
 
 ## Acceptance and persistence
 
@@ -22,7 +22,7 @@ Migration 004 creates initial state for accepted invitations whose banks are sti
 
 Already settled legacy banks are excluded: their wallet settlement does not establish a trustworthy Dice match result. Their invitations remain readable and repeat acceptance remains a no-op; there is no fabricated match history. Standalone banks created directly through the wallet service also do not create matches. Existing bank/ledger/wallet values are not changed by this migration.
 
-The game state is not yet synchronized with calls that settle banks directly through the internal wallet service. D3 must make actual match completion and bank settlement atomic; the future lifecycle must similarly coordinate forfeits and interruptions before exposing those operations to Telegram.
+The game state is not yet synchronized with calls that settle banks directly through the internal wallet service. D3 makes normal match completion and bank settlement atomic; the future lifecycle must similarly coordinate forfeits and interruptions before exposing those operations to Telegram.
 
 ## Sequential attempts (D2)
 
@@ -36,7 +36,7 @@ The adapter uses the returned request ID to correlate a native message to its du
 
 When both attempts exist, the service passes the pair in original participant order to `DiceMatchService` and persists its returned scores, round count, winner, and tiebreak flag in the same transaction. The randomly selected throw order never changes the original participant sides. The duel row lock serializes all request/result mutations; the database also enforces one request per side per round. No match state is kept in service memory. An unfinished pair is recovered by preparing/reading its persisted request in a new transaction.
 
-D2 records the core's decisive result and prevents further requests, but does not settle the bank. D3 must coordinate winner recording and settlement atomically before exposing a complete playable scenario. Direct internal wallet settlement remains uncoordinated with game progress as described above. There is no timeout worker, automatic forfeit/refund, live Telegram message routing, or prompt delivery recovery in D2. The adapter must verify native origin and request correlation; player/chat concurrency limits and timeout coordination with delayed updates remain later decisions.
+D2 records the core's decisive result and prevents further requests, but does not settle the bank. D3 coordinates winner recording and settlement atomically for new decisive pairs. Direct internal wallet settlement remains uncoordinated with game progress as described above. There is no timeout worker, automatic forfeit/refund, live Telegram message routing, or prompt delivery recovery in D2. The adapter must verify native origin and request correlation; player/chat concurrency limits and timeout coordination with delayed updates remain later decisions.
 
 Integration coverage includes request persistence, stable random order on retries, delayed on-time messages, inclusive deadline, invalid/foreign inputs, cross-match message reuse, concurrent request/result retries, incomplete pairs, every series format and tiebreaks, both winner sides, and rollback of an attempt when score persistence fails.
 
@@ -47,3 +47,13 @@ On 2026-10-01, D2 passed `gradlew.bat check bootJar`: formatting, compilation, p
 Integration coverage checks accepted state in separate transactions for every series format, participant order, fractional stake, chat isolation, concurrent/repeated acceptance, full rollback when a database constraint rejects match creation, and rejection of a previously settled bank. A dedicated upgrade test applies the first three migrations, seeds legacy records, then applies migration 004 and repeats the update. It verifies that only outstanding accepted commitments receive initial state and that wallet balances and the ledger remain unchanged. Existing invitation and wallet tests remain required. Full verification: `gradlew.bat check bootJar`.
 
 On 2026-10-01, `gradlew.bat check bootJar` passed: formatting, compilation, packaging, 8 unit tests and 20 PostgreSQL integration tests, with no failures or skips. No live Telegram calls were made.
+
+## Normal-result settlement (D3)
+
+Implemented and verified on `feat/dice-duel-settlement`, based on `master` after D2 merged through PR #5; not yet merged. The decisive pair calls `PvpWalletService.awardWinner` with the player ID corresponding to the core winner side. Both services participate in one transaction. Locks are acquired in order: duel, bank, participant wallets by ascending player ID. No payout formula or game rule changes.
+
+Exact retries return the persisted result without another payout. New requests and conflicting attempts remain rejected. A settlement failure rolls back the attempt, match, bank, wallets, and ledger together. A conflicting prior internal settlement rejects completion instead of overwriting financial history. Direct wallet operations still do not coordinate forfeits or interruptions with match state.
+
+Verification: `gradlew.bat check bootJar` passed on 2026-10-01: 8 unit tests and 30 PostgreSQL integration tests, no failures or skips. Coverage includes both winner sides, every format and tiebreaks, concurrent decisive retries, exactly two payout ledger entries, preserved total funds, and a ledger failure after the first participant's settlement entry.
+
+No schema changes or automatic historical payouts are included. Matches already completed by D2 with a still-locked bank need separate inspection and recovery before using such a database. Telegram delivery, timeout execution, and interruption lifecycle remain pending.
