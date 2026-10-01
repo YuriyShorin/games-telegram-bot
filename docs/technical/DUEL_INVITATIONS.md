@@ -6,7 +6,7 @@ This step implements a persistent application boundary for Dice challenges and a
 
 The invitation publishes two distinct participants, an equal stake, and a series format. Creation does not reserve funds or register players automatically. Acceptance is permitted only to the invited opponent in the same chat and commits both registered wallets atomically. Insufficient funds leave the invitation pending and move no money. A repeated acceptance returns the accepted invitation without committing again. Reusing a challenge ID with different terms is rejected.
 
-An invitation row lock serializes acceptance. Lock order is invitation, bank, then wallets in ascending player ID order. PostgreSQL `ON CONFLICT DO NOTHING` in the repository makes concurrent creation retries safe; other persistence uses Hibernate and JPQL. The invitation ID is also its bank ID. No match is started or settled by this service yet.
+An invitation row lock serializes acceptance. Lock order is invitation, bank, then wallets in ascending player ID order. PostgreSQL `ON CONFLICT DO NOTHING` in the repository makes concurrent creation retries safe; other persistence uses Hibernate and JPQL. The invitation ID is also its bank ID. The subsequent [persistent Dice duel step](DICE_DUELS.md) now creates initial match state in the acceptance transaction; attempts and match-driven settlement remain future tasks.
 
 No expiration, decline, cancellation, active-match limits, or new timeout rules are introduced in this step. These behaviors require subsequent lifecycle work. Existing unanswered questions about paired prompt order and deadline timing remain in [GAMES.md](../product/GAMES.md).
 
